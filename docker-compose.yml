@@ -43,8 +43,15 @@ services:
     grafana:
         image: ${REPO_GRAFANA}
         container_name: grafana
+        user: root
+        volumes:
+          - ./grafana_data:/var/lib/grafana
         ports:
           - 3001:3000
+        environment:
+            HTTP_USER: grafana
+            HTTP_PASS: grafana
+        restart: unless-stopped
     
     mysqldb:
         image: ${REPO_MARIADB}
