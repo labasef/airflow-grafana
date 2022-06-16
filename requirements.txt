@@ -1,0 +1,6 @@
+pytest
+sqlAlchemy
+pandas
+psycopg2-binary
+great_expectations
+pep8-naming

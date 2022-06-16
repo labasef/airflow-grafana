@@ -1,0 +1,57 @@
+
+version: '3.6'
+
+services:
+
+    airflow:
+        image: ${REPO_AIRFLOW}
+        container_name: airflow
+        volumes:
+          - ./dags:/opt/airflow/dags
+          - ./requirements.txt:/opt/airflow/requirements.txt
+        environment:
+            AIRFLOW_HOME: /opt/airflow
+            PYTHONPATH: =/opt/airflow/dags/
+            BUCKET_NAME: ${BUCKET_NAME}
+            AIRFLOW__CORE__EXECUTOR: ${EXECUTOR}
+            AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+            AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+            AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS: 'false'
+            AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth'
+            OBJC_DISABLE_INITIALIZE_FORK_SAFETY: 'YES'
+        ports:
+          - 8080:8080
+        command: 'bash -c "pip3 install -r requirements.txt && airflow db init && airflow webserver -D && airflow scheduler -D"'
+
+    postgres:
+        image: postgres:13
+        container_name: postgres-db
+        ports:
+          - 5444:5432
+        environment:
+            POSTGRES_USER: airflow
+            POSTGRES_PASSWORD: airflow
+            POSTGRES_DB: airflow
+        volumes:
+          - ./postgres-db-volume:/var/lib/postgresql/data
+        healthcheck:
+            test: ["CMD", "pg_isready", "-U", "airflow"]
+            interval: 5s
+            retries: 5
+        restart: always
+
+    grafana:
+        image: ${REPO_GRAFANA}
+        container_name: grafana
+        ports:
+          - 3001:3000
+    
+    mysqldb:
+        image: ${REPO_MARIADB}
+        environment:
+            MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+        container_name: mysqldb
+        ports:
+          - 13306:3306
+
+
