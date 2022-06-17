@@ -36,7 +36,7 @@ with DAG(Constants.DAG_ID,
          schedule_interval=None,
          tags=['branch', 'trigger', 'test']
          ) as dag:
-    my55_hook = MySqlHook(mysql_conn_id='mysql_source')
+    mysql_hook = MySqlHook(mysql_conn_id='mysql_db')
 
     start = DummyOperator(task_id='start')
 
@@ -52,7 +52,7 @@ with DAG(Constants.DAG_ID,
         This task reads the current id value
         """
         try:
-            engine = my55_hook.get_sqlalchemy_engine()
+            engine = mysql_hook.get_sqlalchemy_engine()
             connection = engine.raw_connection()
             cur = connection.cursor()
             select = """select max(id) from test.test;"""
@@ -76,7 +76,7 @@ with DAG(Constants.DAG_ID,
             This task increments the id by 1 unit
             """
             try:
-                engine = my55_hook.get_sqlalchemy_engine()
+                engine = mysql_hook.get_sqlalchemy_engine()
                 connection = engine.raw_connection()
                 cur = connection.cursor()
                 insert = """insert into test.test values ('');"""
